@@ -1,3 +1,7 @@
+/*
+This model created using mongoose schema
+*/
+
 const mongoose = require("mongoose");
 const schema = new mongoose.Schema({
 	name: {
@@ -6,8 +10,8 @@ const schema = new mongoose.Schema({
 		default: "",
 	},
 	phone: {
-		type: Number,
-		default: null,
+		type: String,
+		default: "",
 		unique: true,
 	},
 	email: {
