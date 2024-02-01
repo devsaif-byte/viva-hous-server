@@ -7,23 +7,28 @@ const schema = new mongoose.Schema({
 	name: {
 		type: String,
 		required: true,
-		default: "",
 	},
 	phone: {
 		type: String,
-		default: "",
-		unique: true,
+		required: true,
 	},
 	email: {
 		type: String,
 		required: true,
-		unique: true,
 	},
 	birthDate: {
 		type: String,
-		default: "",
 	},
-	address: { type: String, required: true },
+	address: {
+		type: String,
+		required: true,
+	},
+	propertyReference: {
+		type: String,
+	},
+	message: {
+		type: String,
+	},
 });
 
 let bookingUser = new mongoose.model("bookingUser", schema);

@@ -2,41 +2,67 @@ const UserModel = require("../model/user");
 
 // Create and Save a new user
 exports.create = async (req, res) => {
-	const { name, phone, email, birthDate, address } = req.body;
-	if (!name && !email && !phone && !address) {
-		res.status(400).send({ message: "Some content can not be empty!" });
+	const requiredProperties = [
+		"name",
+		"phone",
+		"email",
+		"address",
+		"birthDate",
+		"propertyReference",
+		"message",
+	];
+
+	for (const prop of requiredProperties) {
+		if (!req.body.hasOwnProperty(prop)) {
+			return res
+				.status(400)
+				.json({ message: `${prop} is required in the request body.` });
+		}
 	}
 
-	const user = new UserModel({
-		name,
-		phone,
-		email,
-		birthDate,
-		address,
-	});
+	try {
+		const {
+			name,
+			phone,
+			email,
+			birthDate,
+			address,
+			propertyReference,
+			message,
+		} = req.body;
 
-	await user
-		.save()
-		.then((data) =>
-			res.send({
-				message: "User booking successful on database!!",
-				user: data,
-			})
-		)
-		.catch((err) =>
-			res
-				.status(500)
-				.send({ message: err.message || "Error occurred while booking" })
-		);
+		if (!name || !email || !phone || !address) {
+			return res.status(400).json({ message: "All fields are required." });
+		}
+		const user = new UserModel({
+			name,
+			phone,
+			email,
+			birthDate,
+			address,
+			propertyReference,
+			message,
+		});
+
+		const savedUser = await user.save();
+		return res.json({
+			message: "User booking successful on database!!",
+			user: savedUser,
+		});
+	} catch (err) {
+		return res
+			.status(500)
+			.json({ message: err.message || "Error occurred while booking" });
+	}
 };
 
 // Retrieve all users from the database.
 exports.findAll = async (req, res) => {
 	try {
 		const user = await UserModel.find();
-		res.status(200).json(user);
+		return res.json(user);
 	} catch (error) {
-		res.status(404).json({ message: error.message });
+		return res.status(404).json({ message: error.message });
 	}
 };
 
@@ -44,37 +70,34 @@ exports.findAll = async (req, res) => {
 exports.findOne = async (req, res) => {
 	try {
 		const user = await UserModel.findById(req.params.id);
-		res.status(200).json(user);
+		return res.json(user);
 	} catch (error) {
-		res.status(404).json({ message: error.message });
+		return res.status(404).json({ message: error.message });
 	}
 };
 
 // Update a user by the id in the request
 exports.update = async (req, res) => {
 	if (!req.body) {
-		res.status(400).send({
+		return res.status(400).json({
 			message: "Data to update can not be empty!",
 		});
 	}
 
 	const id = req.params.id;
 
-	await UserModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-		.then((data) => {
-			if (!data) {
-				res.status(404).send({
-					message: `Booking not found.`,
-				});
-			} else {
-				res.send({ message: "booking updated successfully." });
-			}
-		})
-		.catch((err) => {
-			res.status(500).send({
-				message: err.message,
-			});
+	try {
+		const data = await UserModel.findByIdAndUpdate(id, req.body, {
+			useFindAndModify: false,
 		});
+
+		if (!data) {
+			return res.status(404).json({ message: `Booking not found.` });
+		}
+		return res.json({ message: "booking updated successfully." });
+	} catch (err) {
+		return res.status(500).json({ message: err.message });
+	}
 };
 
 // Delete a user with the specified id in the request
@@ -82,17 +105,17 @@ exports.destroy = async (req, res) => {
 	await UserModel.findByIdAndDelete(req.params.id)
 		.then((data) => {
 			if (!data) {
-				res.status(404).send({
+				return res.status(404).json({
 					message: `Booking not found.`,
 				});
 			} else {
-				res.send({
+				return res.json({
 					message: "booking deleted!",
 				});
 			}
 		})
 		.catch((err) => {
-			res.status(500).send({
+			return res.status(500).json({
 				message: err.message,
 			});
 		});

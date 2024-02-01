@@ -4,7 +4,7 @@ const NewUserModel = require("../model/newUsersModel");
 exports.create = async (req, res) => {
 	const { email, password } = req.body;
 	if (!email && !password) {
-		res.status(400).send({ message: "Some field can not be empty!" });
+		res.status(400).json({ message: "Some field can not be empty!" });
 	}
 
 	const user = new NewUserModel({
@@ -15,7 +15,7 @@ exports.create = async (req, res) => {
 	await user
 		.save()
 		.then((data) =>
-			res.send({
+			res.json({
 				message: "User created successful on database!!",
 				user: data,
 			})
@@ -23,14 +23,14 @@ exports.create = async (req, res) => {
 		.catch((err) =>
 			res
 				.status(500)
-				.send({ message: err.message || "Error occurred while creating user" })
+				.json({ message: err.message || "Error occurred while creating user" })
 		);
 };
 
 // Update/Upsert a user by the email in the request
 exports.update = async (req, res) => {
 	if (!req.body) {
-		res.status(400).send({
+		res.status(400).json({
 			message: "Data to update can not be empty!",
 		});
 	}
@@ -46,15 +46,15 @@ exports.update = async (req, res) => {
 	})
 		.then((data) => {
 			if (!data) {
-				res.status(404).send({
+				res.status(404).json({
 					message: `User already exist or something wrong while register.`,
 				});
 			} else {
-				res.send({ message: "user updated successfully." });
+				res.json({ message: "user updated successfully." });
 			}
 		})
 		.catch((err) => {
-			res.status(500).send({
+			res.status(500).json({
 				message: err.message,
 			});
 		});
@@ -62,7 +62,7 @@ exports.update = async (req, res) => {
 
 exports.makeAdmin = async (req, res) => {
 	if (!req.body)
-		res.status(400).send({
+		res.status(400).json({
 			message: "No data found!",
 		});
 
@@ -72,15 +72,15 @@ exports.makeAdmin = async (req, res) => {
 	const doc = await NewUserModel.updateOne(filter, { $set: { role: "admin" } })
 		.then((data) => {
 			if (!data) {
-				res.status(404).send({
+				res.status(404).json({
 					message: `Something wrong with the user.`,
 				});
 			} else {
-				res.send({ message: "user role was set to admin." });
+				res.json({ message: "user role was set to admin." });
 			}
 		})
 		.catch((err) => {
-			res.status(500).send({
+			res.status(500).json({
 				message: err.message,
 			});
 		});
@@ -88,7 +88,7 @@ exports.makeAdmin = async (req, res) => {
 
 exports.checkAdmin = async (req, res) => {
 	if (!req.body)
-		res.status(400).send({
+		res.status(400).json({
 			message: "No data found!",
 		});
 	const email = req.params.email;
@@ -96,11 +96,11 @@ exports.checkAdmin = async (req, res) => {
 	const user = await NewUserModel.findOne(query)
 		.then((data) => {
 			if (!data) {
-				res.status(404).send({
+				res.status(404).json({
 					message: `User not found!.`,
 				});
 			} else {
-				res.send({ message: "Checking User role is Admin or not.", data });
+				res.json({ message: "Checking User role is Admin or not.", data });
 				let isAdmin = false;
 				if (data?.role === "admin") {
 					isAdmin = true;
@@ -108,7 +108,7 @@ exports.checkAdmin = async (req, res) => {
 			}
 		})
 		.catch((err) => {
-			res.status(500).send({
+			res.status(500).json({
 				message: err.message,
 			});
 		});

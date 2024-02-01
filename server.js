@@ -6,6 +6,16 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const bookingRoutes = require("./booking/routes/booking.js");
+const propertyRoutes = require("./property/routes/propertyRoutes.js");
+const fs = require("fs");
+const propertyModel = require("./property/model/propertyModel.js");
+const {
+	update,
+	makeAdmin,
+	checkAdmin,
+} = require("./users/controller/newUserController.js");
+// const propertyRouter = require("./property/routes/propertyRoutes.js");
+app.use("/properties", propertyRoutes);
 app.use("/user", bookingRoutes);
 
 const dbConfig = require("./db.config.js");
@@ -18,7 +28,7 @@ mongoose
 	})
 	.catch((err) => {
 		console.log("Could not connect to the database", err);
-		process.exit();
+		// process.exit();
 	});
 
 const newRegisteredUser = require("./users/model/newUsersModel.js");
@@ -51,32 +61,20 @@ app.get("/newRegisteredUser/:email", async (req, res) => {
 });
 
 const bookingUser = require("./booking/model/user.js");
+const { create } = require("./booking/controller/bookingUser.js");
 
 app.post("/user/booking", async (req, res) => {
-	const userData = req.body;
-	// console.log(userData);
-	try {
-		// Create a user in Database
-		const newUser = new bookingUser(userData);
-		const savedUser = await newUser.save();
-		res.json({ message: "Your booking request successful", user: savedUser });
-	} catch (err) {
-		res
-			.status(500)
-			.json({ message: "Error occurred while booking", error: err.message });
-	}
+	await create(req, res);
+	// try {
+	// 	// Create a user in Database
+	// 	const newBooking = await create(req, res);
+	// 	res.json({ message: "Your booking request successful", user: newBooking });
+	// } catch (err) {
+	// 	return res
+	// 		.status(500)
+	// 		.json({ message: "Error occurred while booking", error: err.message });
+	// }
 });
-// ***************
-const propertyRoutes = require("./property/routes/propertyRoutes.js");
-const fs = require("fs");
-const propertyModel = require("./property/model/propertyModel.js");
-const {
-	update,
-	makeAdmin,
-	checkAdmin,
-} = require("./users/controller/newUserController.js");
-const { log } = require("console");
-app.use("/properties", propertyRoutes);
 
 // Define a route for handling GET requests to "/properties"
 app.get("/properties", (req, res) => {

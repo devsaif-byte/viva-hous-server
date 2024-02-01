@@ -40,4 +40,13 @@ exports.createProperty = async (req, res) => {
 	}
 };
 
-exports.deleteProperty = async (req, res) => {};
+// exports.findAllProperties = async (req, res) => {
+// 	try {
+// 		const user = await propertyModel.find();
+// 		res.status(200).json(user);
+// 	} catch (error) {
+// 		res.status(404).json({ message: error.message });
+// 	}
+// };
+
+// exports.deleteProperty = async (req, res) => {};
