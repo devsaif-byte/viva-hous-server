@@ -105,6 +105,7 @@ exports.checkAdmin = async (req, res) => {
 				if (data?.role === "admin") {
 					isAdmin = true;
 				}
+				return isAdmin;
 			}
 		})
 		.catch((err) => {

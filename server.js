@@ -51,13 +51,14 @@ app.put("/newRegisteredUser", async (req, res) => {
 	await update(req, res);
 });
 
-app.put("/newRegisteredUser/admin", async (req, res) => {
+app.put("/newRegisteredUser/:email", async (req, res) => {
 	await makeAdmin(req, res);
 });
 
 app.get("/newRegisteredUser/:email", async (req, res) => {
 	let user = await checkAdmin(req, res);
 	console.log(user);
+	return user;
 });
 
 const bookingUser = require("./booking/model/user.js");
