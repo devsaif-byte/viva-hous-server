@@ -33,6 +33,19 @@ mongoose
 
 const newRegisteredUser = require("./users/model/newUsersModel.js");
 
+app.get("/newRegisteredUser/:email", async (req, res) => {
+	try {
+		let user = await checkAdmin(req, res);
+		console.log(user);
+		return user;
+	} catch (error) {
+		console.error("Error in /newRegisteredUser/:email route:", error.message);
+		res
+			.status(500)
+			.json({ message: "Internal Server Error", error: error.message });
+	}
+});
+
 app.post("/newRegisteredUser", async (req, res) => {
 	const user = req.body;
 	try {
@@ -48,58 +61,98 @@ app.post("/newRegisteredUser", async (req, res) => {
 });
 
 app.put("/newRegisteredUser", async (req, res) => {
-	await update(req, res);
+	try {
+		let user = await update(req, res);
+		console.log(user);
+		return user;
+	} catch (error) {
+		console.error("Error in /newRegisteredUser/:email route:", error.message);
+		res
+			.status(500)
+			.json({ message: "Internal Server Error", error: error.message });
+	}
 });
 
 app.put("/newRegisteredUser/:email", async (req, res) => {
-	await makeAdmin(req, res);
-});
-
-app.get("/newRegisteredUser/:email", async (req, res) => {
-	let user = await checkAdmin(req, res);
-	console.log(user);
-	return user;
+	try {
+		let user = await makeAdmin(req, res);
+		// console.log(user);
+		return user;
+	} catch (error) {
+		console.error("Error in /newRegisteredUser/:email route:", error.message);
+		res
+			.status(500)
+			.json({ message: "Internal Server Error", error: error.message });
+	}
 });
 
 const bookingUser = require("./booking/model/user.js");
-const { create } = require("./booking/controller/bookingUser.js");
+const { create, findAll } = require("./booking/controller/bookingUser.js");
+
+const {
+	findAllProperties,
+} = require("./property/controller/propertyController.js");
+
+app.get("/user/booking", async (req, res) => {
+	try {
+		const bookings = await findAll(req, res);
+		res.json({ message: "Bookings retrieved successfully", data: bookings });
+	} catch (err) {
+		console.error("Error occurred while fetching bookings:", err.message);
+		res.status(500).json({
+			message: "Error occurred while fetching bookings",
+			error: err.message,
+		});
+	}
+});
 
 app.post("/user/booking", async (req, res) => {
-	await create(req, res);
-	// try {
-	// 	// Create a user in Database
-	// 	const newBooking = await create(req, res);
-	// 	res.json({ message: "Your booking request successful", user: newBooking });
-	// } catch (err) {
-	// 	return res
-	// 		.status(500)
-	// 		.json({ message: "Error occurred while booking", error: err.message });
-	// }
+	try {
+		// Create a user in Database
+		const newBooking = await create(req, res);
+		res.json({ message: "Your booking request successful", user: newBooking });
+	} catch (err) {
+		return res
+			.status(500)
+			.json({ message: "Error occurred while booking", error: err.message });
+	}
 });
 
 // Define a route for handling GET requests to "/properties"
-app.get("/properties", (req, res) => {
-	// Read data from the JSON file
-	fs.readFile("./property.json", "utf-8", async (err, jsonData) => {
-		if (err) {
-			console.error("Error reading JSON file:", err);
-			res.status(500).json({ message: "Error reading JSON file" });
-		} else {
-			// Send data to the client
-			const data = JSON.parse(jsonData);
-			res.json({
-				message: "Data retrieved from JSON file successfully",
-				data,
-			});
+// app.get("/properties", (req, res) => {
+// 	// Read data from the JSON file
+// 	fs.readFile("./property.json", "utf-8", async (err, jsonData) => {
+// 		if (err) {
+// 			console.error("Error reading JSON file:", err);
+// 			res.status(500).json({ message: "Error reading JSON file" });
+// 		} else {
+// 			// Send data to the client
+// 			const data = JSON.parse(jsonData);
+// 			res.json({
+// 				message: "Data retrieved from JSON file successfully",
+// 				data,
+// 			});
 
-			try {
-				const result = await propertyModel.createProperties(data);
-				console.log(`${result.insertedCount} properties inserted into MongoDB`);
-			} catch (err) {
-				console.error("Error inserting properties into MongoDB:", err.message);
-			}
-		}
-	});
+// 			try {
+// 				const result = await propertyModel.createProperties(data);
+// 				console.log(`${result.insertedCount} properties inserted into MongoDB`);
+// 			} catch (err) {
+// 				console.error("Error inserting properties into MongoDB:", err.message);
+// 			}
+// 		}
+// 	});
+// });
+
+app.get("/properties", async (req, res) => {
+	try {
+		const data = await findAllProperties(req, res);
+		res.json({
+			message: "Data retrieved from Database successfully",
+			data,
+		});
+	} catch (err) {
+		console.error("Error receiving properties from MongoDB!", err.message);
+	}
 });
 
 // Define a route for handling POST requests to "/properties"

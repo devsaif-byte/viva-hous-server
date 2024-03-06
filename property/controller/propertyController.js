@@ -12,7 +12,7 @@ exports.createProperty = async (req, res) => {
 		!baths &&
 		!description
 	)
-		res.status(400).send({ message: "All fields are required" });
+		res.status(400).json({ message: "All fields are required" });
 
 	try {
 		await propertyModel.connect();
@@ -26,27 +26,28 @@ exports.createProperty = async (req, res) => {
 			description,
 		};
 		const createdProperty = await propertyModel.createProperties(property);
-		res.status(201).send({
+		res.status(201).json({
 			message: "Property submitted successfully!",
 			property: createdProperty,
 		});
 	} catch (err) {
 		if (err.code === 11000)
-			return res.status(400).send({ message: "Duplicate property found!" });
+			return res.status(400).json({ message: "Duplicate property found!" });
 
 		res
 			.status(500)
-			.send({ message: err.message || "Error occurred while submitting" });
+			.json({ message: err.message || "Error occurred while submitting" });
 	}
 };
 
-// exports.findAllProperties = async (req, res) => {
-// 	try {
-// 		const user = await propertyModel.find();
-// 		res.status(200).json(user);
-// 	} catch (error) {
-// 		res.status(404).json({ message: error.message });
-// 	}
-// };
+exports.findAllProperties = async (req, res) => {
+	try {
+		const properties = await propertyModel.getPropertiesFromDb();
+		console.log(properties);
+		res.status(200).json(properties);
+	} catch (error) {
+		res.status(404).json({ message: error.message });
+	}
+};
 
 // exports.deleteProperty = async (req, res) => {};

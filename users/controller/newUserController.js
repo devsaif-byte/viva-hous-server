@@ -67,7 +67,15 @@ exports.makeAdmin = async (req, res) => {
 		});
 
 	const user = req.body;
+	// const user = req.params.email;
 	const filter = { email: user.email };
+
+	const checkUserExistence = await NewUserModel.findOne(filter);
+
+	if (checkUserExistence?.role === "admin")
+		return res.status(404).json({ message: "User already set as admin" });
+	if (!checkUserExistence)
+		return res.status(404).json({ message: "This user is not exist" });
 
 	const doc = await NewUserModel.updateOne(filter, { $set: { role: "admin" } })
 		.then((data) => {
@@ -87,31 +95,22 @@ exports.makeAdmin = async (req, res) => {
 };
 
 exports.checkAdmin = async (req, res) => {
-	if (!req.body)
-		res.status(400).json({
-			message: "No data found!",
-		});
-	const email = req.params.email;
-	const query = { email };
-	const user = await NewUserModel.findOne(query)
-		.then((data) => {
-			if (!data) {
-				res.status(404).json({
-					message: `User not found!.`,
-				});
-			} else {
-				res.json({ message: "Checking User role is Admin or not.", data });
-				let isAdmin = false;
-				if (data?.role === "admin") {
-					isAdmin = true;
-				}
-				return isAdmin;
-			}
-		})
-		.catch((err) => {
-			res.status(500).json({
-				message: err.message,
+	try {
+		if (!req.body) throw new Error("No data found!");
+		const email = req.params.email;
+		const query = { email };
+		const user = await NewUserModel.findOne(query);
+		if (!user) {
+			return res.status(404).json({
+				message: `User not found!.`,
 			});
+		}
+		let isAdmin = user.role === "admin";
+		return res.json({
+			message: "Checking User role is Admin or not.",
+			admin: isAdmin,
 		});
-	return user;
+	} catch (err) {
+		return res.status(500).json({ message: err.message });
+	}
 };
