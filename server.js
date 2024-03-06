@@ -17,6 +17,14 @@ const {
 // const propertyRouter = require("./property/routes/propertyRoutes.js");
 app.use("/properties", propertyRoutes);
 app.use("/user", bookingRoutes);
+app.use(function (req, res, next) {
+	res.header("Access-Control-Allow-Origin", "https://viva3412a.web.app");
+	res.header(
+		"Access-Control-Allow-Headers",
+		"Origin, X-Requested-With, Content-Type, Accept"
+	);
+	next();
+});
 
 const dbConfig = require("./db.config.js");
 const mongoose = require("mongoose");
